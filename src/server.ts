@@ -1,5 +1,6 @@
 import express, { Application } from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 
 import cfg from './config'
 import errorHandler from './middlewares/errorHandler'
@@ -22,6 +23,7 @@ class Server {
   private applyMiddlewares(): void {
     this.app.use(bodyParser.urlencoded({ extended: true }))
     this.app.use(bodyParser.json({ limit: cfg.bodyLimits.maxJsonSize }))
+    this.app.use(cors())
   }
 
   private dbConnect(): void {
