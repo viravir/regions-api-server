@@ -1,0 +1,12 @@
+# deps
+node_modules
+
+# build
+dist
+
+# development
+.vscode
+.DS_Store
+
+# installation log
+package-lock.json
