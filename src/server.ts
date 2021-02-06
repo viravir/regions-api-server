@@ -9,7 +9,7 @@ import regionsRouter from './routers/RegionsRouter'
 import routeNotFoundHandler from './middlewares/routeNotFoundHandler'
 
 class Server {
-  private app: Application;
+  private app: Application
 
   constructor() {
     this.app = express()
@@ -27,7 +27,7 @@ class Server {
   }
 
   private dbConnect(): void {
-    pool.connect(function (err) {
+    pool.connect((err) => {
       if (err) throw new Error(err.message)
       console.log('Connected to db')
     })
@@ -45,11 +45,14 @@ class Server {
     this.app.use('*', routeNotFoundHandler)
   }
 
-  public start = () => new Promise((resolve, reject) => {
-    this.app.listen(Number(cfg.listenPort), () => {
-      resolve(Number(cfg.listenPort))
-    }).on('error', (err) => reject(err))
-  })
+  public start = (): Promise<number> =>
+    new Promise((resolve, reject) => {
+      this.app
+        .listen(Number(cfg.listenPort), () => {
+          resolve(Number(cfg.listenPort))
+        })
+        .on('error', (err) => reject(err))
+    })
 }
 
 export default Server

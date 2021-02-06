@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express'
 import { ValidationError } from 'joi'
 
 // TODO -> use custom error type
-const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): any => {
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
   console.log('Centralized error handler catched an error: ', err)
 
   const errorStatus = err instanceof ValidationError ? 400 : 500

@@ -1,6 +1,6 @@
 import { Pool } from 'pg'
 
-import cfg from '../config';
+import cfg from '../config'
 
 export default new Pool({
   max: cfg.maxDbConnections,

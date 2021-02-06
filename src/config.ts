@@ -7,6 +7,6 @@ export default {
   maxDbConnections: 20,
   maxDbQueryTime: 30000,
   bodyLimits: {
-    maxJsonSize: '1mb'
-  }
+    maxJsonSize: '1mb',
+  },
 }
