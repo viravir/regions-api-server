@@ -61,11 +61,16 @@ class RegionsService {
   }
 
   public update = async (params: UpdateParams): Promise<void> => {
+    const regionExists = await this.repository.get({ id: params.id })
+    if (!regionExists) {
+      throw new Error('Region does not exist')
+    }
+
     const existingRegionAtPath = await this.repository.get({ path: params.path })
     if (existingRegionAtPath) {
       throw new Error('Region already exists at provided path')
     }
-    // TODO -> check if updated node exists
+
     await this.repository.update({ id: params.id, name: params.name, path: params.path })
   }
 
