@@ -3,19 +3,16 @@ import Joi from 'joi'
 
 import RegionService from '../services/RegionService'
 
-// TODO -> use better validation against injections
 const getParamsValidator = Joi.object({
   id: Joi.number().integer().min(0).required(),
 })
 
-// TODO -> use better validation against injections
 const addParamsValidator = Joi.object({
   name: Joi.string().max(200).required(),
   // TODO -> add pattern
   path: Joi.string().required()
 })
 
-// TODO -> use better validation against injections
 const updateParamsValidator = Joi.object({
   id: Joi.number().integer().min(0).required(),
   name: Joi.string().max(200).optional(),
@@ -24,7 +21,6 @@ const updateParamsValidator = Joi.object({
   .with('id', [])
   .or('name', 'path')
 
-// TODO -> use better validation against injections
 const deleteParamsValidator = Joi.object({
   id: Joi.number().integer().min(0).required(),
 })
