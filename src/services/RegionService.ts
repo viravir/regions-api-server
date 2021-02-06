@@ -44,6 +44,17 @@ class RegionsService {
     if (existingRegionAtPath) {
       throw new Error('Region already exists at provided path')
     }
+
+    const pathPositionGroups = params.path.split('.')
+    const addingToExistingNode = pathPositionGroups.length > 1
+    if (addingToExistingNode) {
+      const parentNodePath = pathPositionGroups.slice(0, pathPositionGroups.length - 1).join('.')
+      const parentNode = await this.repository.get({ path: parentNodePath })
+      if (!parentNode) {
+        throw new Error('Parent node for this region does not exist')
+      }
+    }
+
     const region = await this.repository.add({ name: params.name, path: params.path })
 
     return region
@@ -54,6 +65,7 @@ class RegionsService {
     if (existingRegionAtPath) {
       throw new Error('Region already exists at provided path')
     }
+    // TODO -> check if updated node exists
     await this.repository.update({ id: params.id, name: params.name, path: params.path })
   }
 
