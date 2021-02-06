@@ -43,10 +43,11 @@ class RegionRepository {
       const client = await pool.connect()
 
       const queryStatement = params.id ?
-        `SELECT * FROM ${cfg.dbTableName} WHERE id = ${params.id};`
+        `SELECT * FROM ${cfg.dbTableName} WHERE id = $1;`
         :
-        `SELECT * FROM ${cfg.dbTableName} WHERE path = '${params.path}';`
-      const { rows } = await client.query(queryStatement)
+        `SELECT * FROM ${cfg.dbTableName} WHERE path = $1;`
+      const queryValues = [params.id || params.path]
+      const { rows } = await client.query(queryStatement, queryValues)
 
       client.release()
 
@@ -60,8 +61,9 @@ class RegionRepository {
     try {
       const client = await pool.connect()
 
-      const queryStatement = `INSERT INTO ${cfg.dbTableName} (name, path) VALUES ('${params.name}', '${params.path}') RETURNING *;`
-      const { rows } = await client.query(queryStatement)
+      const queryStatement = `INSERT INTO ${cfg.dbTableName} (name, path) VALUES ($1, $2) RETURNING *;`
+      const queryValues = [params.name, params.path]
+      const { rows } = await client.query(queryStatement, queryValues)
 
       client.release()
 
@@ -76,23 +78,28 @@ class RegionRepository {
       const client = await pool.connect()
 
       if (params.name !== undefined) {
-        const queryStatement = `UPDATE ${cfg.dbTableName} set name = '${params.name}' WHERE id = ${params.id};`
-        await client.query(queryStatement)
+        const queryStatement = `UPDATE ${cfg.dbTableName} set name = $1 WHERE id = $2;`
+        const queryValues = [params.name, params.id]
+        await client.query(queryStatement, queryValues)
       }
       if (params.path) {
-        const getCurrentPathStatement = `SELECT path FROM ${cfg.dbTableName} WHERE id = ${params.id};`
-        const { rows } = await client.query(getCurrentPathStatement)
+        const getCurrentPathStatement = `SELECT path FROM ${cfg.dbTableName} WHERE id = $1;`
+        const queryValues = [params.id]
+        const { rows } = await client.query(getCurrentPathStatement, queryValues)
 
         const currentPath = rows[0].path
 
         if (currentPath !== params.path) {
+          // TODO -> figure out how to do it via single operation
           // move target node
-          const queryStatement = `UPDATE ${cfg.dbTableName} set path = '${params.path}' WHERE path = '${currentPath}';`
-          await client.query(queryStatement)
+          const queryStatement = `UPDATE ${cfg.dbTableName} set path = $1 WHERE path = $2;`
+          const queryValues = [params.path, currentPath]
+          await client.query(queryStatement, queryValues)
 
           // attach children nodes to node with updated path
-          const childrenQueryStatement = `UPDATE ${cfg.dbTableName} set path = '${params.path}' || subpath(path, nlevel('${currentPath}')) WHERE path <@ '${currentPath}';`
-          await client.query(childrenQueryStatement)
+          const childrenQueryStatement = `UPDATE ${cfg.dbTableName} set path = $1 || subpath(path, nlevel($2)) WHERE path <@ $2;`
+          const childrenQueryValues = [params.path, currentPath]
+          await client.query(childrenQueryStatement, childrenQueryValues)
         }
       }
 
@@ -106,13 +113,15 @@ class RegionRepository {
     try {
       const client = await pool.connect()
 
-      const getCurrentPathStatement = `SELECT path FROM ${cfg.dbTableName} WHERE id = ${params.id};`
-      const { rows: pathFindRows } = await client.query(getCurrentPathStatement)
+      const getCurrentPathStatement = `SELECT path FROM ${cfg.dbTableName} WHERE id = $1;`
+      const getCurrentPathQueryValues = [params.id]
+      const { rows: pathFindRows } = await client.query(getCurrentPathStatement, getCurrentPathQueryValues)
 
       const currentPath = pathFindRows[0].path
 
-      const queryStatement = `DELETE FROM ${cfg.dbTableName} WHERE path <@ '${currentPath}';`
-      await client.query(queryStatement)
+      const queryStatement = `DELETE FROM ${cfg.dbTableName} WHERE path <@ $1;`
+      const queryValues = [currentPath]
+      await client.query(queryStatement, queryValues)
 
       client.release()
     } catch(e) {
